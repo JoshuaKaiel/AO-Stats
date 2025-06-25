@@ -27,7 +27,6 @@ function calc_stats(spi, mag, str, wep) {
     console.log(ord_ratios);
     
     if (ord_ratios[0].value >= 0.6) {
-        console.log("Pure");
         switch(ord_ratios[0].stat) {
             case "spirit":
                 name = "Oracle";
@@ -44,7 +43,6 @@ function calc_stats(spi, mag, str, wep) {
         }
     }
     else if (ord_ratios[0].value >= 0.4 && ord_ratios[1].value >= 0.4) {
-        console.log("Hybrid");
         let stat_key = [ord_ratios[0].stat, ord_ratios[1].stat].sort().join("_")
         switch(stat_key) {
             case "magic_spirit":
@@ -68,11 +66,8 @@ function calc_stats(spi, mag, str, wep) {
         }
     }
     else if (ord_ratios[0].value <= 0.5 && ord_ratios[1].value <= 0.4 && ord_ratios[2].value <= 0.4) {
-        console.log("Savant");
         name = "Savant";
     }
-
-    console.log("~~~~~~~~~~~~~~~~");
 
     return [level, name, ord_ratios];
 }
@@ -97,10 +92,6 @@ calc_btn.addEventListener("click", () => {
     let strength = Number(in_str.value);
     let weapons = Number(in_wep.value);
 
-    console.log(spirit)
-    console.log(spirit + magic)
-    console.log("-------------")
-
     let res = calc_stats(spirit, magic, strength, weapons);
     
     div_build.innerHTML = `<p><b>Level ${res[0]} <i>${res[1]}</i></b></p>`
@@ -108,16 +99,16 @@ calc_btn.addEventListener("click", () => {
     res[2].forEach((elem) => {
         switch(elem.stat) {
             case "spirit":
-                r_spi.textContent = elem.value * 100 + "%";
+                r_spi.innerHTML = `<p>${elem.value * 100}%</p>`;
                 break;
             case "magic":
-                r_mag.textContent = elem.value * 100 + "%";
+                r_mag.innerHTML = `<p>${elem.value * 100}%</p>`;
                 break;
             case "strength":
-                r_str.textContent = elem.value * 100 + "%"; 
+                r_str.innerHTML = `<p>${elem.value * 100}%</p>`; 
                 break;
             case "weapons":
-                r_wep.textContent = elem.value * 100 + "%";
+                r_wep.innerHTML = `<p>${elem.value * 100}%</p>`;
                 break;
         }
     });
