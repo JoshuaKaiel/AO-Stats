@@ -94,7 +94,7 @@ calc_btn.addEventListener("click", () => {
 
     let res = calc_stats(spirit, magic, strength, weapons);
     
-    div_build.innerHTML = `<p><b>Level ${res[0]} <i>${res[1]}</i></b></p>`
+    div_build.innerHTML = `<p><b>Level ${res[0]} <i>${res[1]}</i></b></p>`;
 
     res[2].forEach((elem) => {
         switch(elem.stat) {
