@@ -23,8 +23,11 @@ function calc_stats(spi, mag, str, wep) {
         if (a.value > b.value) return 1;
         return 0;
     });
+
+    console.log(ord_ratios);
     
     if (ord_ratios[0].value >= 0.6) {
+        console.log("Pure");
         switch(ord_ratios[0].stat) {
             case "spirit":
                 name = "Oracle";
@@ -41,6 +44,7 @@ function calc_stats(spi, mag, str, wep) {
         }
     }
     else if (ord_ratios[0].value >= 0.4 && ord_ratios[1].value >= 0.4) {
+        console.log("Hybrid");
         let stat_key = [ord_ratios[0].stat, ord_ratios[1].stat].sort().join("_")
         switch(stat_key) {
             case "magic_spirit":
@@ -64,16 +68,25 @@ function calc_stats(spi, mag, str, wep) {
         }
     }
     else if (ord_ratios[0].value <= 0.5 && ord_ratios[1].value <= 0.4 && ord_ratios[2].value <= 0.4) {
-        name = "Savant"
+        console.log("Savant");
+        name = "Savant";
     }
 
-    return [level, name];
+    console.log("~~~~~~~~~~~~~~~~");
+
+    return [level, name, ord_ratios];
 }
 
 const in_spi = document.getElementById("input_spirit");
 const in_mag = document.getElementById("input_magic");
 const in_str = document.getElementById("input_strength");
 const in_wep = document.getElementById("input_weapons");
+
+const r_spi = document.getElementById("ratio_spirit");
+const r_mag = document.getElementById("ratio_magic");
+const r_str = document.getElementById("ratio_strength");
+const r_wep = document.getElementById("ratio_weapons");
+
 const div_build = document.getElementById("div_build");
 
 const calc_btn = document.getElementById("calc_btn");
@@ -84,7 +97,29 @@ calc_btn.addEventListener("click", () => {
     let strength = Number(in_str.value);
     let weapons = Number(in_wep.value);
 
+    console.log(spirit)
+    console.log(spirit + magic)
+    console.log("-------------")
+
     let res = calc_stats(spirit, magic, strength, weapons);
     
-    div_build.innerHTML = `<p><b>${res[0]}<i>${res[1]}</i></b></p>`
+    div_build.innerHTML = `<p><b>Level ${res[0]} <i>${res[1]}</i></b></p>`
+
+    res[2].forEach((elem) => {
+        switch(elem.stat) {
+            case "spirit":
+                r_spi.textContent = elem.value * 100 + "%";
+                break;
+            case "magic":
+                r_mag.textContent = elem.value * 100 + "%";
+                break;
+            case "strength":
+                r_str.textContent = elem.value * 100 + "%"; 
+                break;
+            case "weapons":
+                r_wep.textContent = elem.value * 100 + "%";
+                break;
+        }
+    });
+
 });
