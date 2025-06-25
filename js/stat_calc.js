@@ -6,10 +6,17 @@ function calc_stats(spi, mag, str, wep) {
     let level = total / 2;
     let name = "None";
 
-    spi_ratio = spi / total;
-    mag_ratio = mag / total;
-    str_ratio = str / total;
-    wep_ratio = wep / total;
+    let spi_ratio = spi / total;
+    let mag_ratio = mag / total;
+    let str_ratio = str / total;
+    let wep_ratio = wep / total;
+
+    if (total == 0) {
+        spi_ratio = 0;
+        mag_ratio = 0;
+        str_ratio = 0;
+        wep_ratio = 0;
+    }
 
     let ord_ratios = [
         {stat: "spirit", value: spi_ratio}, 
