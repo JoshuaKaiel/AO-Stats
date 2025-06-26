@@ -143,20 +143,32 @@ calc_btn.addEventListener("click", async () => {
 
     let spi_q = query(collection(db, "Habilidades"), where("stats", "array_contains", "spi"));
 
-    let mag_q = query(collection(db, "Habilidades"), and(and(where("stats", "array_contains", "mag"), 
-                                                            and(where("wep", "not_in", "stats"), where("spi", "not_in", "stats")), where("requirements", "<=", magic))));
+    let mag_q = query(collection(db, "Habilidades"), where("stats", "array_contains", "mag"),
+                                                     where("requirements", "<=", magic));
 
-    let str_q = query(collection(db, "Habilidades"), and(and(where("stats", "array_contains", "str"), 
-                                                            and(where("wep", "not_in", "stats"), where("spi", "not_in", "stats")), where("requirements", "<=", strength))));
+    let str_q = query(collection(db, "Habilidades"), where("stats", "array_contains", "str"), 
+                                                     where("requirements", "<=", strength));
 
     let wep_q = query(collection(db, "Habilidades"), where("stats", "array_contains", "wep"));
 
 
-    let spi_skills = await getDocs(spi_q);
-    let mag_skills = await getDocs(mag_q);
-    let str_skills = await getDocs(str_q);
-    let wep_skills = await getDocs(wep_q);
+    let spi_skills = (await getDocs(spi_q)).docs;
+    let mag_skills = (await getDocs(mag_q)).docs;
+    let str_skills = (await getDocs(str_q)).docs;
+    let wep_skills = (await getDocs(wep_q)).docs;
 
     console.log(wep_skills);
+
+    mag_skills.filter((skill) => {
+        const data = skill.data();
+        return (!data.stats.includes("wep") && !data.stats.includes("spi"))
+    });
+
+    str_skills.filter((skill) => {
+        const data = skill.data();
+        return (!data.stats.includes("wep") && !data.stats.includes("spi"))
+    });
+
+    console.log(str_skills);
 
 });
