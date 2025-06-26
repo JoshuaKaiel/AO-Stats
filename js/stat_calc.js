@@ -223,9 +223,9 @@ calc_btn.addEventListener("click", async () => {
         let sh_reqs = Math.ceil(data.requirements / shared.length);
 
         shared.forEach((sh_stat) => {
-            const value = statlist.filter((sl_stat) => {
+            const value = (statlist.filter((sl_stat) => {
                 return sl_stat.stat == sh_stat;
-            });
+            }))[0];
 
             if (sh_stat in stats)
                 st_values.push(value);
@@ -234,16 +234,16 @@ calc_btn.addEventListener("click", async () => {
 
         if (stats.includes("wep") || stats.includes("spi")) {
             if ("unique" in data && data.unique && 
-                (st_values.every(elem => elem > st_reqs) || 
-                (sh_values.every(elem => elem > sh_reqs)))) {
+                (st_values.every(elem => elem.value > st_reqs) || 
+                (sh_values.every(elem => elem.value > sh_reqs)))) {
                     if ("exclusive" in data)
                         learnable.push({name: data.name, extra: `for the ${data.exclusive}`});
                     else 
                         learnable.push({name: data.name});
             }
             else {
-                let st_req_item = (Math.min(st_values) - ((st_reqs - 30) / st_values.length)) / 2;
-                let sh_req_item = (Math.min(sh_values) - ((sh_reqs - 30) / sh_values.length)) / 2;
+                let st_req_item = (Math.min(st_values.map(elem => { return elem.value; })) - ((st_reqs - 30) / st_values.length)) / 2;
+                let sh_req_item = (Math.min(sh_values.map(elem => { return elem.value; })) - ((sh_reqs - 30) / sh_values.length)) / 2;
                 let max_wep_lvl = Math.ceil(Math.max([st_req_item, sh_req_item]));
 
                 if (max_wep_lvl >= 0) {
@@ -254,8 +254,8 @@ calc_btn.addEventListener("click", async () => {
                 }
             }
         }
-        else if ((st_values.every(elem => elem > st_reqs) || 
-                (sh_values.every(elem => elem > sh_reqs)))) {
+        else if ((st_values.every(elem => elem.value > st_reqs) || 
+                (sh_values.every(elem => elem.value > sh_reqs)))) {
                 if ("exclusive" in data)
                     learnable.push({name: data.name, extra: `for ${data.exclusive}`});
                 else 
