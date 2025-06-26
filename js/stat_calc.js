@@ -219,6 +219,9 @@ calc_btn.addEventListener("click", async () => {
         let st_values = [];
         let sh_values = [];
 
+        let st_reqs = Math.ceil(data.requirements / stats.length);
+        let sh_reqs = Math.ceil(data.requirements / shared.length);
+
         shared.forEach((sh_stat) => {
             const value = statlist.filter((sl_stat) => {
                 return sl_stat.stat == sh_stat;
@@ -231,13 +234,32 @@ calc_btn.addEventListener("click", async () => {
 
         if (stats.includes("wep") || stats.includes("spi")) {
             if ("unique" in data && data.unique && 
-                (st_values.every(elem => elem > data.requirements) || 
-                (sh_values.every(elem => elem > data.requirements)))) {
+                (st_values.every(elem => elem > st_reqs) || 
+                (sh_values.every(elem => elem > sh_reqs)))) {
                     if ("exclusive" in data)
                         learnable.push({name: data.name, extra: `for the ${data.exclusive}`});
                     else 
                         learnable.push({name: data.name});
             }
+            else {
+                let st_req_item = (Math.min(st_values) - ((st_reqs - 30) / st_values.length)) / 2;
+                let sh_req_item = (Math.min(sh_values) - ((sh_reqs - 30) / sh_values.length)) / 2;
+                let max_wep_lvl = Math.ceil(Math.max([st_req_item, sh_req_item]));
+
+                if (max_wep_lvl >= 0) {
+                    if ("exclusive" in data)
+                        learnable.push({name: data.name, extra: `for the ${data.exclusive}`});
+                    else 
+                        learnable.push({name: data.name, extra: `for an item of level ${max_wep_lvl}`});
+                }
+            }
+        }
+        else if ((st_values.every(elem => elem > st_reqs) || 
+                (sh_values.every(elem => elem > sh_reqs)))) {
+                if ("exclusive" in data)
+                    learnable.push({name: data.name, extra: `for ${data.exclusive}`});
+                else 
+                    learnable.push({name: data.name});
         }
 
     });
