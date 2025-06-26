@@ -207,13 +207,17 @@ calc_btn.addEventListener("click", async () => {
 
     skills.forEach((skill) => {
         const data = skill.data();
-        stats = data.stats;
-        shared = data.stats;
-        if ("shared" in data)
-            shared += data.shared;
-
-        st_values = [];
-        sh_values = [];
+        let stats = data.stats;
+        let shared = data.stats;
+        
+        if ("shared" in data) {
+            data.shared.forEach((st) => {
+                shared.push(st);
+            });
+        }
+        
+        let st_values = [];
+        let sh_values = [];
 
         shared.forEach((sh_stat) => {
             const value = statlist.filter((sl_stat) => {
@@ -225,7 +229,7 @@ calc_btn.addEventListener("click", async () => {
             sh_values.push(value);
         })
 
-        if ("wep" in stats || "spi" in stats) {
+        if (stats.includes("wep") || stats.includes("spi")) {
             if ("unique" in data && data.unique && 
                 (st_values.every(elem => elem > data.requirements) || 
                 (sh_values.every(elem => elem > data.requirements)))) {
