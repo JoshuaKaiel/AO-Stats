@@ -53,7 +53,7 @@ function calc_stats(spi, mag, str, wep) {
     let total = spi + mag + str + wep;
     let level = total / 2;
     let name = "None";
-    let key = "all";
+    let key = "mag_spi_str_wep";
 
     let spi_ratio = spi / total;
     let mag_ratio = mag / total;
@@ -179,36 +179,16 @@ calc_btn.addEventListener("click", async () => {
         {stat: "wep", value: weapons}
     ];
 
+    const skills = (await getDocs(collection(db, "Habilidades"))).docs;
 
-    let spi_q = query(collection(db, "Habilidades"), where("stats", "array-contains", "spi"));
-
-    let mag_q = query(collection(db, "Habilidades"), where("stats", "array-contains", "mag"));
-
-    let str_q = query(collection(db, "Habilidades"), where("stats", "array-contains", "str"));
-
-    let wep_q = query(collection(db, "Habilidades"), where("stats", "array-contains", "wep"));
-
-
-    let spi_skills = (await getDocs(spi_q)).docs;
-    let mag_skills = (await getDocs(mag_q)).docs;
-    let str_skills = (await getDocs(str_q)).docs;
-    let wep_skills = (await getDocs(wep_q)).docs;
-
-    const all_skills = [...spi_skills, ...mag_skills, ...str_skills, ...wep_skills];
+    console.log("unique total:", skills.length);
     
-    const skillsMap = new Map();
-
-    all_skills.forEach(skill => {
-    skillsMap.set(skill.id, skill);
-    });
-
-    const skills = Array.from(skillsMap.values());
     let learnable = [];
 
     skills.forEach((skill) => {
         const data = skill.data();
-        let stats = data.stats;
-        let shared = data.stats;
+        let stats = JSON.parse(JSON.stringify(data.stats));
+        let shared = JSON.parse(JSON.stringify(data.stats));
         
         if ("shared" in data) {
             data.shared.forEach((st) => {
@@ -218,32 +198,34 @@ calc_btn.addEventListener("click", async () => {
         
         let st_values = [];
         let sh_values = [];
-
+        
         let st_reqs = Math.ceil(data.requirements / stats.length);
         let sh_reqs = Math.ceil(data.requirements / shared.length);
 
+        console.log("stats ==> " + JSON.stringify(stats));
+        
         shared.forEach((sh_stat) => {
-            const value = statlist.find((sl_stat) => { sl_stat.stat == sh_stat; });
-
-            if (sh_stat in stats)
+            const value = statlist.find((sl_stat) => sl_stat.stat == sh_stat );
+            
+            if (value && stats.includes(sh_stat))
                 st_values.push(value);
             sh_values.push(value);
         })
-
+        
         if (stats.includes("wep") || stats.includes("spi")) {
             if ("unique" in data && data.unique && 
-                (st_values.every(elem => stats.includes(elem.stat) ? elem.value > st_reqs : true) || 
-                (sh_values.every(elem => stats.includes(elem.stat) ? elem.value > sh_reqs : true)))) {
+                (st_values.every(elem => res[3].includes(elem.stat) && elem.value >= st_reqs) || 
+                (sh_values.every(elem => res[3].includes(elem.stat) && elem.value >= sh_reqs)))) {
                     if ("exclusive" in data)
                         learnable.push({name: data.name, extra: `for the ${data.exclusive}`});
                     else 
                         learnable.push({name: data.name});
             }
             else {
-                let st_req_item = (Math.min(st_values.map(elem => { return elem.value; })) - ((st_reqs - 30) / st_values.length)) / 2;
-                let sh_req_item = (Math.min(sh_values.map(elem => { return elem.value; })) - ((sh_reqs - 30) / sh_values.length)) / 2;
-                let max_wep_lvl = Math.ceil(Math.max([st_req_item, sh_req_item]));
-
+                let st_req_item = (Math.min(...st_values.map(elem => Number(elem.value))) - ((st_reqs - 30) / st_values.length)) / 2;
+                let sh_req_item = (Math.min(...sh_values.map(elem => Number(elem.value))) - ((sh_reqs - 30) / sh_values.length)) / 2;
+                let max_wep_lvl = Math.ceil(Math.max(...[st_req_item, sh_req_item]));
+                
                 if (max_wep_lvl >= 0) {
                     if ("exclusive" in data)
                         learnable.push({name: data.name, extra: `for the ${data.exclusive}`});
@@ -252,14 +234,14 @@ calc_btn.addEventListener("click", async () => {
                 }
             }
         }
-        else if ((st_values.every(elem => stats.includes(elem.stat) ? elem.value > st_reqs : true) || 
-                (sh_values.every(elem => stats.includes(elem.stat) ? elem.value > sh_reqs : true)))) {
+        else if ((st_values.every(elem => res[3].includes(elem.stat) && elem.value >= st_reqs)) || 
+                (sh_values.every(elem => res[3].includes(elem.stat) && elem.value >= sh_reqs))) {
                 if ("exclusive" in data)
                     learnable.push({name: data.name, extra: `for ${data.exclusive}`});
                 else 
                     learnable.push({name: data.name});
         }
-
+                
     });
 
     div_skills.innerHTML = "<h4>List of learnable skills</h4>";
