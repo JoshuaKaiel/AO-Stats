@@ -210,36 +210,48 @@ calc_btn.addEventListener("click", async () => {
             if (value && stats.includes(sh_stat))
                 st_values.push(value);
             sh_values.push(value);
-        })
+        });
+
+        let st_validation = st_values.every(elem => res[3].includes(elem.stat) && elem.value >= st_reqs);
+        let sh_validation = sh_values.every(elem => res[3].includes(elem.stat) && elem.value >= sh_reqs);
+
+        let st_key = stats.sort().join("_");
+        let sh_key = shared.sort().join("_");
+
+        let sk_color = st_validation ? st_key : sh_key;
         
         if (stats.includes("wep") || stats.includes("spi")) {
-            if ("unique" in data && data.unique && 
-                (st_values.every(elem => res[3].includes(elem.stat) && elem.value >= st_reqs) || 
-                (sh_values.every(elem => res[3].includes(elem.stat) && elem.value >= sh_reqs)))) {
+            if ("unique" in data && data.unique && (st_validation || sh_validation)) {
                     if ("exclusive" in data)
-                        learnable.push({name: data.name, extra: `for the ${data.exclusive}`});
+                        learnable.push({name: data.name, color: sk_color, extra: `for the ${data.exclusive}`});
                     else 
-                        learnable.push({name: data.name});
+                        learnable.push({name: data.name, color: sk_color});
             }
             else {
                 let st_req_item = (Math.min(...st_values.map(elem => Number(elem.value))) - ((st_reqs - 30) / st_values.length)) / 2;
                 let sh_req_item = (Math.min(...sh_values.map(elem => Number(elem.value))) - ((sh_reqs - 30) / sh_values.length)) / 2;
                 let max_wep_lvl = Math.ceil(Math.max(...[st_req_item, sh_req_item]));
                 
+                if (st_req_item >= sh_req_item) {
+                    sk_color = st_key;
+                }
+                else {
+                    sk_color = sh_key;
+                }
+
                 if (max_wep_lvl >= 0) {
                     if ("exclusive" in data)
-                        learnable.push({name: data.name, extra: `for the ${data.exclusive}`});
+                        learnable.push({name: data.name, color: sk_color, extra: `for the ${data.exclusive}`});
                     else 
-                        learnable.push({name: data.name, extra: `for an item of level ${max_wep_lvl}`});
+                        learnable.push({name: data.name, color: sk_color, extra: `for an item of level ${max_wep_lvl}`});
                 }
             }
         }
-        else if ((st_values.every(elem => res[3].includes(elem.stat) && elem.value >= st_reqs)) || 
-                (sh_values.every(elem => res[3].includes(elem.stat) && elem.value >= sh_reqs))) {
+        else if (st_validation || sh_validation) {
                 if ("exclusive" in data)
-                    learnable.push({name: data.name, extra: `for ${data.exclusive}`});
+                    learnable.push({name: data.name, color: sk_color, extra: `for ${data.exclusive}`});
                 else 
-                    learnable.push({name: data.name});
+                    learnable.push({name: data.name, color: sk_color});
         }
                 
     });
@@ -248,9 +260,9 @@ calc_btn.addEventListener("click", async () => {
 
     learnable.forEach((skill) => {
         if ("extra" in skill)
-            div_skills.innerHTML += `<p class="py-1"><i>${skill.name}</i> ${skill.extra}</p>`;
+            div_skills.innerHTML += `<p class="py-1"><i style="color : ${skill.sk_color};">${skill.name}</i> ${skill.extra}</p>`;
         else 
-            div_skills.innerHTML += `<p class="py-1"><i>${skill.name}</i></p>`;
+            div_skills.innerHTML += `<p class="py-1"><i style="color: ${skill.color};">${skill.name}</i></p>`;
     })  
 
 });
