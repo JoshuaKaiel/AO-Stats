@@ -1,4 +1,25 @@
 
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+import { getFirestore, collection, query, where } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js"
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+    apiKey: "AIzaSyCYgPMdifUdKkTcTlBeNNQotNJOsSGLgAM",
+    authDomain: "ao-skills.firebaseapp.com",
+    projectId: "ao-skills",
+    storageBucket: "ao-skills.firebasestorage.app",
+    messagingSenderId: "313665526646",
+    appId: "1:313665526646:web:06ae83e61870ff8b5c3857",
+    measurementId: "G-X0ZB1KKDQD"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 function calc_stats(spi, mag, str, wep) {
 
@@ -92,7 +113,7 @@ const r_wep = document.getElementById("ratio_weapons");
 const div_build = document.getElementById("div_build");
 
 const calc_btn = document.getElementById("calc_btn");
-calc_btn.addEventListener("click", () => {
+calc_btn.addEventListener("click", async () => {
 
     let spirit = Number(in_spi.value);
     let magic = Number(in_mag.value);
@@ -119,5 +140,17 @@ calc_btn.addEventListener("click", () => {
                 break;
         }
     });
+
+    let spi_skills = query(collection(db, "Habilidades"), where("stats", "array_contains", "spi"));
+
+    let mag_skills = query(collection(db, "Habilidades"), and(and(where("stats", "array_contains", "mag"), 
+                                                            and(where("wep", "not_in", "stats"), where("spi", "not_in", "stats")), where("requirements", "<=", magic))));
+
+    let str_skills = query(collection(db, "Habilidades"), and(and(where("stats", "array_contains", "str"), 
+                                                            and(where("wep", "not_in", "stats"), where("spi", "not_in", "stats")), where("requirements", "<=", strength))));
+
+    let wep_skills = query(collection(db, "Habilidades"), where("stats", "array_contains", "wep"));
+
+    console.log(wep_skills);
 
 });
