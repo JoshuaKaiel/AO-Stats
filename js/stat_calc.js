@@ -1,7 +1,7 @@
 
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-import { getFirestore, collection, query, where } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js"
+import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js"
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -141,15 +141,15 @@ calc_btn.addEventListener("click", async () => {
         }
     });
 
-    let spi_skills = query(collection(db, "Habilidades"), where("stats", "array_contains", "spi"));
+    let spi_skills = await db.getDocs(query(collection(db, "Habilidades"), where("stats", "array_contains", "spi")));
 
-    let mag_skills = query(collection(db, "Habilidades"), and(and(where("stats", "array_contains", "mag"), 
-                                                            and(where("wep", "not_in", "stats"), where("spi", "not_in", "stats")), where("requirements", "<=", magic))));
+    let mag_skills = await db.getDocs(query(collection(db, "Habilidades"), and(and(where("stats", "array_contains", "mag"), 
+                                                            and(where("wep", "not_in", "stats"), where("spi", "not_in", "stats")), where("requirements", "<=", magic)))));
 
-    let str_skills = query(collection(db, "Habilidades"), and(and(where("stats", "array_contains", "str"), 
-                                                            and(where("wep", "not_in", "stats"), where("spi", "not_in", "stats")), where("requirements", "<=", strength))));
+    let str_skills = await db.getDocs(query(collection(db, "Habilidades"), and(and(where("stats", "array_contains", "str"), 
+                                                            and(where("wep", "not_in", "stats"), where("spi", "not_in", "stats")), where("requirements", "<=", strength)))));
 
-    let wep_skills = query(collection(db, "Habilidades"), where("stats", "array_contains", "wep"));
+    let wep_skills = await db.getDocs(query(collection(db, "Habilidades"), where("stats", "array_contains", "wep")));
 
     console.log(wep_skills);
 
