@@ -21,11 +21,39 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+function stats_to_rgba(string) {
+    switch(string) {
+        case "spi":
+            return "rgba(34, 197, 94, 1)";
+        case "mag":
+            return "rgba(59, 130, 246, 1)";
+        case "str":
+            return "rgba(248, 113, 113, 1)";
+        case "wep":
+            return "rgba(250, 204, 21, 1)";
+        case "mag_spi":
+            return "rgba(32, 216, 172, 1)";
+        case "mag_str":
+            return "rgba(255, 144, 175, 1)";
+        case "mag_wep":
+            return "rgba(125, 220, 173, 1)";
+        case "spi_str":
+            return "rgba(168, 118, 67, 1)";
+        case "spi_wep":
+            return "rgba(146, 211, 83, 1)";
+        case "str_wep":
+            return "rgba(235, 161, 90, 1)";
+        default:
+            return "rgba(249, 219, 248, 1)";
+    }
+}
+
 function calc_stats(spi, mag, str, wep) {
 
     let total = spi + mag + str + wep;
     let level = total / 2;
     let name = "None";
+    let key = "all";
 
     let spi_ratio = spi / total;
     let mag_ratio = mag / total;
@@ -40,10 +68,10 @@ function calc_stats(spi, mag, str, wep) {
     }
 
     let ord_ratios = [
-        {stat: "spirit", value: spi_ratio}, 
-        {stat: "magic", value: mag_ratio}, 
-        {stat: "strength", value: str_ratio}, 
-        {stat: "weapons", value: wep_ratio}
+        {stat: "spi", value: spi_ratio}, 
+        {stat: "mag", value: mag_ratio}, 
+        {stat: "str", value: str_ratio}, 
+        {stat: "wep", value: wep_ratio}
     ];
 
     ord_ratios.sort((a, b) => {
@@ -55,40 +83,41 @@ function calc_stats(spi, mag, str, wep) {
     console.log(ord_ratios);
     
     if (ord_ratios[0].value >= 0.6) {
-        switch(ord_ratios[0].stat) {
-            case "spirit":
+        key = ord_ratios[0].stat;
+        switch(key) {
+            case "spi":
                 name = "Oracle";
                 break;
-            case "magic":
+            case "mag":
                 name = "Mage";
                 break;
-            case "strength":
+            case "str":
                 name = "Berserker";
                 break;
-            case "weapons":
+            case "wep":
                 name = "Warrior";
                 break;
         }
     }
     else if (ord_ratios[0].value >= 0.4 && ord_ratios[1].value >= 0.4) {
-        let stat_key = [ord_ratios[0].stat, ord_ratios[1].stat].sort().join("_")
-        switch(stat_key) {
-            case "magic_spirit":
+        key = [ord_ratios[0].stat, ord_ratios[1].stat].sort().join("_");
+        switch(key) {
+            case "mag_spi":
                 name = "Paladin";
                 break;
-            case "magic_strength":
+            case "mag_str":
                 name = "Warlock";
                 break;
-            case "magic_weapons":
+            case "mag_wep":
                 name = "Conjurer";
                 break;
-            case "spirit_strength":
+            case "spi_str":
                 name = "Juggernaut";
                 break;
-            case "spirit_weapons":
+            case "spi_wep":
                 name = "Knight";
                 break;
-            case "strength_weapons":
+            case "str_wep":
                 name = "Warlord";
                 break;
         }
@@ -97,7 +126,7 @@ function calc_stats(spi, mag, str, wep) {
         name = "Savant";
     }
 
-    return [level, name, ord_ratios];
+    return [level, name, ord_ratios, key];
 }
 
 const in_spi = document.getElementById("input_spirit");
@@ -111,6 +140,7 @@ const r_str = document.getElementById("ratio_strength");
 const r_wep = document.getElementById("ratio_weapons");
 
 const div_build = document.getElementById("div_build");
+const div_skills = document.getElementById("div_skills");
 
 const calc_btn = document.getElementById("calc_btn");
 calc_btn.addEventListener("click", async () => {
@@ -122,34 +152,41 @@ calc_btn.addEventListener("click", async () => {
 
     let res = calc_stats(spirit, magic, strength, weapons);
     
-    div_build.innerHTML = `<h4><b>Level ${res[0]} <i>${res[1]}</i></b></h4>`;
-
     res[2].forEach((elem) => {
         switch(elem.stat) {
-            case "spirit":
+            case "spi":
                 r_spi.innerHTML = `${elem.value * 100}%`;
                 break;
-            case "magic":
+            case "mag":
                 r_mag.innerHTML = `${elem.value * 100}%`;
                 break;
-            case "strength":
+            case "str":
                 r_str.innerHTML = `${elem.value * 100}%`; 
                 break;
-            case "weapons":
+            case "wep":
                 r_wep.innerHTML = `${elem.value * 100}%`;
                 break;
         }
     });
 
-    let spi_q = query(collection(db, "Habilidades"), where("stats", "array_contains", "spi"));
+    div_build.innerHTML = `<h4><b>Level ${res[0]} <i style="color : ${stats_to_rgba(res[3])};">${res[1]}</i></b></h4>`;
 
-    let mag_q = query(collection(db, "Habilidades"), where("stats", "array_contains", "mag"),
-                                                     where("requirements", "<=", magic));
 
-    let str_q = query(collection(db, "Habilidades"), where("stats", "array_contains", "str"), 
-                                                     where("requirements", "<=", strength));
+    let statlist = [
+        {stat: "spi", value: spirit}, 
+        {stat: "mag", value: magic}, 
+        {stat: "str", value: strength}, 
+        {stat: "wep", value: weapons}
+    ];
 
-    let wep_q = query(collection(db, "Habilidades"), where("stats", "array_contains", "wep"));
+
+    let spi_q = query(collection(db, "Habilidades"), where("stats", "array-contains", "spi"));
+
+    let mag_q = query(collection(db, "Habilidades"), where("stats", "array-contains", "mag"));
+
+    let str_q = query(collection(db, "Habilidades"), where("stats", "array-contains", "str"));
+
+    let wep_q = query(collection(db, "Habilidades"), where("stats", "array-contains", "wep"));
 
 
     let spi_skills = (await getDocs(spi_q)).docs;
@@ -157,18 +194,57 @@ calc_btn.addEventListener("click", async () => {
     let str_skills = (await getDocs(str_q)).docs;
     let wep_skills = (await getDocs(wep_q)).docs;
 
-    console.log(wep_skills);
+    const all_skills = [...spi_skills, ...mag_skills, ...str_skills, ...wep_skills];
+    
+    const skillsMap = new Map();
 
-    mag_skills.filter((skill) => {
-        const data = skill.data();
-        return (!data.stats.includes("wep") && !data.stats.includes("spi"))
+    all_skills.forEach(skill => {
+    skillsMap.set(skill.id, skill);
     });
 
-    str_skills.filter((skill) => {
+    const skills = Array.from(skillsMap.values());
+    let learnable = [];
+
+    skills.forEach((skill) => {
         const data = skill.data();
-        return (!data.stats.includes("wep") && !data.stats.includes("spi"))
+        stats = data.stats;
+        shared = data.stats;
+        if ("shared" in data)
+            shared += data.shared;
+
+        st_values = [];
+        sh_values = [];
+
+        shared.forEach((sh_stat) => {
+            const value = statlist.filter((sl_stat) => {
+                return sl_stat.stat == sh_stat;
+            });
+
+            if (sh_stat in stats)
+                st_values.push(value);
+            sh_values.push(value);
+        })
+
+        if ("wep" in stats || "spi" in stats) {
+            if ("unique" in data && data.unique && 
+                (st_values.every(elem => elem > data.requirements) || 
+                (sh_values.every(elem => elem > data.requirements)))) {
+                    if ("exclusive" in data)
+                        learnable.push({name: data.name, extra: `for the ${data.exclusive}`});
+                    else 
+                        learnable.push({name: data.name});
+            }
+        }
+
     });
 
-    console.log(str_skills);
+    div_skills.innerHTML = "<h4>List of learnable skills</h4>";
+
+    learnable.forEach((skill) => {
+        if ("extra" in skill)
+            div_skills.innerHTML += `<p class="py-1"><i>${skill.name}</i> ${skill.extra}</p>`;
+        else 
+            div_skills.innerHTML += `<p class="py-1"><i>${skill.name}</i></p>`;
+    })  
 
 });
