@@ -223,9 +223,7 @@ calc_btn.addEventListener("click", async () => {
         let sh_reqs = Math.ceil(data.requirements / shared.length);
 
         shared.forEach((sh_stat) => {
-            const value = (statlist.filter((sl_stat) => {
-                return sl_stat.stat == sh_stat;
-            }))[0];
+            const value = statlist.find((sl_stat) => { sl_stat.stat == sh_stat; });
 
             if (sh_stat in stats)
                 st_values.push(value);
@@ -234,8 +232,8 @@ calc_btn.addEventListener("click", async () => {
 
         if (stats.includes("wep") || stats.includes("spi")) {
             if ("unique" in data && data.unique && 
-                (st_values.every(elem => elem.value > st_reqs) || 
-                (sh_values.every(elem => elem.value > sh_reqs)))) {
+                (st_values.every(elem => stats.includes(elem.stat) ? elem.value > st_reqs : true) || 
+                (sh_values.every(elem => stats.includes(elem.stat) ? elem.value > sh_reqs : true)))) {
                     if ("exclusive" in data)
                         learnable.push({name: data.name, extra: `for the ${data.exclusive}`});
                     else 
@@ -254,8 +252,8 @@ calc_btn.addEventListener("click", async () => {
                 }
             }
         }
-        else if ((st_values.every(elem => elem.value > st_reqs) || 
-                (sh_values.every(elem => elem.value > sh_reqs)))) {
+        else if ((st_values.every(elem => stats.includes(elem.stat) ? elem.value > st_reqs : true) || 
+                (sh_values.every(elem => stats.includes(elem.stat) ? elem.value > sh_reqs : true)))) {
                 if ("exclusive" in data)
                     learnable.push({name: data.name, extra: `for ${data.exclusive}`});
                 else 
