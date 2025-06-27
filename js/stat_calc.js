@@ -218,7 +218,7 @@ calc_btn.addEventListener("click", async () => {
         let st_key = stats.sort().join("_");
         let sh_key = shared.sort().join("_");
 
-        let sk_color = st_validation ? st_key : sh_key;
+        let sk_color = st_validation ? stats_to_rgba(st_key) : stats_to_rgba(sh_key);
         
         if (stats.includes("wep") || stats.includes("spi")) {
             if ("unique" in data && data.unique && (st_validation || sh_validation)) {
@@ -233,10 +233,10 @@ calc_btn.addEventListener("click", async () => {
                 let max_wep_lvl = Math.ceil(Math.max(...[st_req_item, sh_req_item]));
                 
                 if (st_req_item >= sh_req_item) {
-                    sk_color = st_key;
+                    sk_color = stats_to_rgba(st_key);
                 }
                 else {
-                    sk_color = sh_key;
+                    sk_color = stats_to_rgba(sh_key);
                 }
 
                 if (max_wep_lvl >= 0) {
@@ -260,7 +260,7 @@ calc_btn.addEventListener("click", async () => {
 
     learnable.forEach((skill) => {
         if ("extra" in skill)
-            div_skills.innerHTML += `<p class="py-1"><i style="color : ${skill.sk_color};">${skill.name}</i> ${skill.extra}</p>`;
+            div_skills.innerHTML += `<p class="py-1"><i style="color : ${skill.color};">${skill.name}</i> ${skill.extra}</p>`;
         else 
             div_skills.innerHTML += `<p class="py-1"><i style="color: ${skill.color};">${skill.name}</i></p>`;
     })  
