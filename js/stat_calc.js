@@ -270,7 +270,7 @@ async function awaitCalc() {
     
     loading_div.innerHTML = "Loading..."
     loading_div.classList.remove("d-none");
-    (await stat_calc()).then(() => {
+    await stat_calc().then(() => {
         loading_div.classList.add("d-none");
     })
     .catch((exc) => {
