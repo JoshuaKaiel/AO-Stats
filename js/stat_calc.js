@@ -129,6 +129,7 @@ function calc_stats(spi, mag, str, wep) {
     return [level, name, ord_ratios, key];
 }
 
+
 const in_spi = document.getElementById("input_spirit");
 const in_mag = document.getElementById("input_magic");
 const in_str = document.getElementById("input_strength");
@@ -141,10 +142,9 @@ const r_wep = document.getElementById("ratio_weapons");
 
 const div_build = document.getElementById("div_build");
 const div_skills = document.getElementById("div_skills");
+const loading_div = document.getElementById("loading_div");
 
-const calc_btn = document.getElementById("calc_btn");
-calc_btn.addEventListener("click", async () => {
-
+async function stat_calc() {
     let spirit = Number(in_spi.value);
     let magic = Number(in_mag.value);
     let strength = Number(in_str.value);
@@ -264,5 +264,28 @@ calc_btn.addEventListener("click", async () => {
         else 
             div_skills.innerHTML += `<p class="py-1"><i style="color: ${skill.color};">${skill.name}</i></p>`;
     })  
+}
 
-});
+async function awaitCalc() {
+    
+    loading_div.innerHTML = "Loading..."
+    loading_div.hidden = false;
+    (await stat_calc()).then(() => {
+        loading_div.innerHTML = ""
+        loading_div.hidden = true;
+    })
+    .catch((exc) => {
+        loading_div.innerHTML = "Error while calculating: " + exc; 
+    });
+
+};
+
+const calc_btn = document.getElementById("calc_btn");
+calc_btn.addEventListener("click", (await awaitCalc())); 
+calc_btn.addEventListener("keydown", async (event) => {
+    if ((event.key) === "Enter") {
+        await awaitCalc();
+    }
+}); 
+
+
