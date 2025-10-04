@@ -269,10 +269,9 @@ async function stat_calc() {
 async function awaitCalc() {
     
     loading_div.innerHTML = "Loading..."
-    loading_div.hidden = false;
+    loading_div.classList.remove("d-none");
     (await stat_calc()).then(() => {
-        loading_div.innerHTML = ""
-        loading_div.hidden = true;
+        loading_div.classList.add("d-none");
     })
     .catch((exc) => {
         loading_div.innerHTML = "Error while calculating: " + exc; 
