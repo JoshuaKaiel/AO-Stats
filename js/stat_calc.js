@@ -280,8 +280,8 @@ async function awaitCalc() {
 };
 
 const calc_btn = document.getElementById("calc_btn");
-calc_btn.addEventListener("click", (await awaitCalc())); 
-calc_btn.addEventListener("keydown", async (event) => {
+calc_btn.addEventListener("click", awaitCalc); 
+document.addEventListener("keydown", async (event) => {
     if ((event.key) === "Enter") {
         await awaitCalc();
     }
