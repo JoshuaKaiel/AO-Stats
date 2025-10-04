@@ -228,8 +228,8 @@ calc_btn.addEventListener("click", async () => {
                         learnable.push({name: data.name, color: sk_color});
             }
             else {
-                let st_req_item = (Math.min(...st_values.map(elem => Number(elem.value))) - ((st_reqs - 30) / st_values.length)) / 2;
-                let sh_req_item = (Math.min(...sh_values.map(elem => Number(elem.value))) - ((sh_reqs - 30) / sh_values.length)) / 2;
+                let st_req_item = (Math.min(...st_values.map(elem => Number(elem.value))) - (Math.max(0, st_reqs - 30) / st_values.length)) / 2;
+                let sh_req_item = (Math.min(...sh_values.map(elem => Number(elem.value))) - (Math.max(0, sh_reqs - 30) / sh_values.length)) / 2;
                 let max_wep_lvl = Math.ceil(Math.max(...[st_req_item, sh_req_item]));
                 
                 if (st_req_item >= sh_req_item) {
@@ -239,7 +239,7 @@ calc_btn.addEventListener("click", async () => {
                     sk_color = stats_to_rgba(sh_key);
                 }
 
-                if (max_wep_lvl >= 0) {
+                if (max_wep_lvl > 0) {
                     if ("exclusive" in data)
                         learnable.push({name: data.name, color: sk_color, extra: `for the ${data.exclusive}`});
                     else 
